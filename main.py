@@ -42,6 +42,10 @@ GPIO.setup(17, GPIO.IN,pull_up_down=GPIO.PUD_UP)
 GPIO.setup(27, GPIO.IN,pull_up_down=GPIO.PUD_UP)
 
 def set_value(type):
+    if type == "temp":
+        unit = "'C"
+    else:
+        unit = "l"
     global new
     new = True
     value = 0
@@ -70,7 +74,7 @@ def set_value(type):
                         value = 150
                     
                 lcd.clear()
-                lcd.write_string(f'Aktualna wartosc       {value}')
+                lcd.write_string(f'Aktualna wartosc       {value}{unit}')
                 if new:
                     sleep(0.5)
                     new = False
@@ -80,7 +84,7 @@ def set_value(type):
                 if value < 0:
                     value = 0
                 lcd.clear()
-                lcd.write_string(f'Aktualna wartosc       {value}')
+                lcd.write_string(f'Aktualna wartosc       {value}{unit}')
                 if new:
                     sleep(0.5)
                     new = False
@@ -115,8 +119,17 @@ if __name__ == "__main__":
     GPIO.output(ALARM, 1)
     GPIO.output(ZAWOR, 1)
     GPIO.add_event_detect(WATER_FLOW_SENSOR, GPIO.FALLING, callback=count_pulses)
-  
     while True:
+        lcd.clear()
+        lcd.write_string("  Hej! Tu twoj\n\rasystent kapieli")
+        ha = vlc.MediaPlayer('Hej_tu_asystent.m4a')
+        ha.play()
+        sleep(3)
+        lcd.clear()
+        lcd.write_string("   Wcisnij OK\n\r  aby rozpoczac")
+        wc = vlc.MediaPlayer('wcisnij_ok.m4a')
+        wc.play()
+        sleep(3)
         finished = False
         started = False
         pulse_counter = 0
@@ -144,14 +157,15 @@ if __name__ == "__main__":
                 break
         lcd.clear()
         lcd.write_string("     Podaj \n\rtemperature wody")
+        pt = vlc.MediaPlayer('podaj_temperature.m4a')
+        pt.play()
         water_temp_set = set_value("temp")
  
         lcd.clear()
-        lcd.write_string(f'  Temperatura:  \n\r       {water_temp_set}' )
-        
-        lcd.clear()
         lcd.write_string("     Podaj \n\r   ilosc wody")
-        
+        pi = vlc.MediaPlayer('podaj_ilosc.m4a')
+        pt.stop()
+        pi.play()
         water_vol_set = set_value("vol")
 
 
@@ -164,6 +178,7 @@ if __name__ == "__main__":
           
         lcd.cursor_pos=(1,0)
         lcd.write_string(f'Ilosc wody: ')
+        
         
         while True:
             lcd.cursor_pos=(0,14-len(str(int((get_temperature())))))
@@ -192,12 +207,26 @@ if __name__ == "__main__":
             
             if abs(get_temperature()-water_temp_set) < 4:
                 music = False
+            sleep(0.1)
+
         lcd.clear()
+         
         lcd.write_string(" Milej kapieli!")
-        sleep(5)
+   
+        mk = vlc.MediaPlayer('kapiel 2.mp3')
+        mk.play()
+        sleep(3)
+        mk.stop()
+        
+        lcd.clear()
+        lcd.write_string("Daj znac\n\rjak skonczysz :)")
+        dz = vlc.MediaPlayer('daj_znac.m4a')
+        dz.play()
+        sleep(3)
+        dz.stop()
         while True:
             lcd.clear()
-            lcd.write_string("Daj mi znac\n\rjak skonczysz :)")
+            lcd.write_string("*** Wcisnij ***\n\r***    OK    ***")
             for i in range(30):
                 sleep(0.1)
                 if GPIO.input(27):
@@ -207,7 +236,7 @@ if __name__ == "__main__":
                 break
             
             lcd.clear()
-            lcd.write_string("*** Wcisnij ***\n\r***    OK    ***")
+            lcd.write_string("Daj znac\n\rjak skonczysz :)")
             for i in range(30):
                 sleep(0.1)
                 if GPIO.input(27):
